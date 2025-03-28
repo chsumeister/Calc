@@ -63,8 +63,8 @@
             <Button Grid.Column="3" Grid.Row="2" Background="#41393a" FontSize="20" Foreground="White" Click="Backspace_Click">←</Button>
 
             <Button Grid.Column="0" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White" Click="Reciprocal_Click">1/x</Button>
-            <Button Grid.Column="1" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White" Click="Square_Click">x²</Button>
-            <Button Grid.Column="2" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White" Click="SquareRoot_Click">√x</Button>
+            <Button Grid.Column="1" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White" Click="Degree_Click">x²</Button>
+            <Button Grid.Column="2" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White" Click="Square_Click">√x</Button>
             <Button Grid.Column="3" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White" Click="Divide_Click">/</Button>
 
             <Button Grid.Column="0" Grid.Row="4" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">7</Button>
