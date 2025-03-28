@@ -5,15 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:curc_c_.Views"
         mc:Ignorable="d"
-        Title="Calculator" Height ="600" Width="400" MinHeight="600" MinWidth="400"
+        Title="Calculator" Height="600" Width="400" MinHeight="600" MinWidth="400"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanMinimize"
         xmlns:prism="http://prismlibrary.com/"
-        prism:ViewModelLocator.AutoWireViewModel="True">
-    <!-- тут призм связывает shellview и shellviewmodell-->
+        prism:ViewModelLocator.AutoWireViewModel="True"
+        KeyDown="Window_KeyDown">
+    <!-- интерфейс калькулятора(будет еще изменен в будущем) -->
     <Grid>
         <Grid x:Name="MainGr" Background="#271d1e">
-            <!-- ряды -->
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition />
@@ -24,58 +24,68 @@
                 <RowDefinition />
                 <RowDefinition />
             </Grid.RowDefinitions>
-            <!-- колонки -->
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
+            
+           <!--два текстблока для отображения выражения и результата -->
+            <TextBlock x:Name="ExpressionDisplay" Text="{Binding Expression}"
+           TextAlignment="Left"
+           VerticalAlignment="Center"
+           FontFamily="Times New Roman"
+           FontSize="24"
+           Foreground="White"
+           TextTrimming="CharacterEllipsis"
+           HorizontalAlignment="Stretch"
+           Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4"
+           Padding="0,0,10,0"/>
 
-            <TextBlock x:Name="Циферке" Text="Тут будут результаты вычисления"
-       TextAlignment="Right" 
-       VerticalAlignment="Center" 
-       FontFamily="Times New Roman" 
-       FontSize="24" 
-       Foreground="White" 
-       TextTrimming="CharacterEllipsis" 
-       HorizontalAlignment="Stretch"
-       Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"
-       Padding="0,0,10,0"/>
-            <TextBlock Grid.Row="0" Grid.Column="4" Text="История" x:Name="История" Foreground="White" Padding="0,0,10,0"/>
+            <TextBlock x:Name="ResultDisplay" Text="{Binding Result}"
+           TextAlignment="Right"
+           VerticalAlignment="Center"
+           FontFamily="Times New Roman"
+           FontSize="24"
+           Foreground="White"
+           TextTrimming="CharacterEllipsis"
+           HorizontalAlignment="Stretch"
+           Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"
+           Padding="0,0,10,0"/>
+
+            <Button Grid.Column="4" Grid.Row="0" Background="#41393a" FontSize="20" Foreground="White" Click="ShowHistory_Click">История</Button>
 
             <!-- кнопки -->
-            <Button Grid.Column="4" Grid.Row="0" Background="#41393a" FontSize="20" Foreground="White" >История</Button>
+            <Button Grid.Column="0" Grid.Row="2" Background="#41393a" FontSize="20" Foreground="White" Click="Percentage_Click">%</Button>
+            <Button Grid.Column="1" Grid.Row="2" Background="#41393a" FontSize="20" Foreground="White" Click="ClearEntry_Click">CE</Button>
+            <Button Grid.Column="2" Grid.Row="2" Background="#41393a" FontSize="20" Foreground="White" Click="Clear_Click">C</Button>
+            <Button Grid.Column="3" Grid.Row="2" Background="#41393a" FontSize="20" Foreground="White" Click="Backspace_Click">←</Button>
 
-            <Button Grid.Column="0" Grid.Row="2" Background="#41393a" FontSize="20" Foreground="White">%</Button>
-            <Button Grid.Column="1" Grid.Row="2" Background="#41393a" FontSize="20" Foreground="White" Click="Button_Click">CE</Button>
-            <Button Grid.Column="2" Grid.Row="2" Background="#41393a" FontSize="20" Foreground="White">C</Button>
-            <Button Grid.Column="3" Grid.Row="2" Background="#41393a" FontSize="20" Foreground="White">←</Button>
+            <Button Grid.Column="0" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White" Click="Reciprocal_Click">1/x</Button>
+            <Button Grid.Column="1" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White" Click="Square_Click">x²</Button>
+            <Button Grid.Column="2" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White" Click="SquareRoot_Click">√x</Button>
+            <Button Grid.Column="3" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White" Click="Divide_Click">/</Button>
 
-            <Button Grid.Column="0" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White">1/x</Button>
-            <Button Grid.Column="1" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White" Click="Button_Click_1">x²</Button>
-            <Button Grid.Column="2" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White" Click="Button_Click">√x</Button>
-            <Button Grid.Column="3" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White">/</Button>
+            <Button Grid.Column="0" Grid.Row="4" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">7</Button>
+            <Button Grid.Column="1" Grid.Row="4" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">8</Button>
+            <Button Grid.Column="2" Grid.Row="4" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">9</Button>
+            <Button Grid.Column="3" Grid.Row="4" Background="#41393a" FontSize="20" Foreground="White" Click="Multiply_Click">*</Button>
 
-            <Button Grid.Column="0" Grid.Row="4" Background="#403839" FontSize="20" Foreground="White">7</Button>
-            <Button Grid.Column="1" Grid.Row="4" Background="#403839" FontSize="20" Foreground="White">8</Button>
-            <Button Grid.Column="2" Grid.Row="4" Background="#403839" FontSize="20" Foreground="White">9</Button>
-            <Button Grid.Column="3" Grid.Row="4" Background="#41393a" FontSize="20" Foreground="White">*</Button>
+            <Button Grid.Column="0" Grid.Row="5" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">4</Button>
+            <Button Grid.Column="1" Grid.Row="5" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">5</Button>
+            <Button Grid.Column="2" Grid.Row="5" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">6</Button>
+            <Button Grid.Column="3" Grid.Row="5" Background="#41393a" FontSize="20" Foreground="White" Click="Subtract_Click">-</Button>
 
-            <Button Grid.Column="0" Grid.Row="5" Background="#403839" FontSize="20" Foreground="White">4</Button>
-            <Button Grid.Column="1" Grid.Row="5" Background="#403839" FontSize="20" Foreground="White">5</Button>
-            <Button Grid.Column="2" Grid.Row="5" Background="#403839" FontSize="20" Foreground="White">6</Button>
-            <Button Grid.Column="3" Grid.Row="5" Background="#41393a" FontSize="20" Foreground="White">-</Button>
+            <Button Grid.Column="0" Grid.Row="6" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">1</Button>
+            <Button Grid.Column="1" Grid.Row="6" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">2</Button>
+            <Button Grid.Column="2" Grid.Row="6" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">3</Button>
+            <Button Grid.Column="3" Grid.Row="6" Background="#41393a" FontSize="20" Foreground="White" Click="Add_Click">+</Button>
 
-            <Button Grid.Column="0" Grid.Row="6" Background="#403839" FontSize="20" Foreground="White">1</Button>
-            <Button Grid.Column="1" Grid.Row="6" Background="#403839" FontSize="20" Foreground="White">2</Button>
-            <Button Grid.Column="2" Grid.Row="6" Background="#403839" FontSize="20" Foreground="White">3</Button>
-            <Button Grid.Column="3" Grid.Row="6" Background="#41393a" FontSize="20" Foreground="White">+</Button>
-
-            <Button Grid.Column="0" Grid.Row="7" Background="#403839" FontSize="20" Foreground="White">+/-</Button>
-            <Button Grid.Column="1" Grid.Row="7" Background="#403839" FontSize="20" Foreground="White">0</Button>
-            <Button Grid.Column="2" Grid.Row="7" Background="#403839" FontSize="20" Foreground="White">,</Button>
-            <Button Grid.Column="3" Grid.Row="7" Background="#595959" FontSize="20" Foreground="White">=</Button>
+            <Button Grid.Column="0" Grid.Row="7" Background="#403839" FontSize="20" Foreground="White" Click="ToggleSign_Click">+/-</Button>
+            <Button Grid.Column="1" Grid.Row="7" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">0</Button>
+            <Button Grid.Column="2" Grid.Row="7" Background="#403839" FontSize="20" Foreground="White" Click="Decimal_Click">.</Button>
+            <Button Grid.Column="3" Grid.Row="7" Background="#595959" FontSize="20" Foreground="White" Click="Equals_Click">=</Button>
         </Grid>
     </Grid>
 </Window>
