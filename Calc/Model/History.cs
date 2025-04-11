@@ -1,24 +1,14 @@
-﻿namespace curc_c_.Model
-{
+﻿using System.Collections.Generic;
 
-    // модель для истории
+namespace curc_c_.Model
+{
     internal class History
     {
-        private List<string> _entries = new List<string>();
+        public IReadOnlyList<string> Entries { get; }
 
-        public void AddEntry(string entry)
+        public History(IEnumerable<string> entries)
         {
-            _entries.Add(entry);
-        }
-
-        public void Clear()
-        {
-            _entries.Clear();
-        }
-
-        public IEnumerable<string> GetEntries()
-        {
-            return _entries;
+            Entries = new List<string>(entries).AsReadOnly();
         }
     }
 }

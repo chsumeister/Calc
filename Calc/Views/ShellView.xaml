@@ -3,89 +3,108 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:curc_c_.Views"
-        mc:Ignorable="d"
-        Title="Calculator" Height="600" Width="400" MinHeight="600" MinWidth="400"
-        WindowStartupLocation="CenterScreen"
-        ResizeMode="CanMinimize"
         xmlns:prism="http://prismlibrary.com/"
         prism:ViewModelLocator.AutoWireViewModel="True"
-        KeyDown="Window_KeyDown">
-    <!-- интерфейс калькулятора(будет еще изменен в будущем) -->
-    <Grid>
-        <Grid x:Name="MainGr" Background="#271d1e">
+        mc:Ignorable="d"
+        Title="Calculator" 
+        Height="600" 
+        Width="400" 
+        MinHeight="600" 
+        MinWidth="400"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanMinimize">
+
+    <Window.InputBindings>
+        <KeyBinding Key="D0" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.D0}"/>
+        <KeyBinding Key="D1" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.D1}"/>
+        <KeyBinding Key="D2" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.D2}"/>
+        <KeyBinding Key="D3" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.D3}"/>
+        <KeyBinding Key="D4" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.D4}"/>
+        <KeyBinding Key="D5" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.D5}"/>
+        <KeyBinding Key="D6" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.D6}"/>
+        <KeyBinding Key="D7" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.D7}"/>
+        <KeyBinding Key="D8" Modifiers="Shift" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.D8}"/>
+        <KeyBinding Key="D8" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.D8}"/>
+        <KeyBinding Key="D9" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.D9}"/>
+        <KeyBinding Key="OemPlus" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.OemPlus}"/>
+        <KeyBinding Key="OemMinus" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.OemMinus}"/>
+        <KeyBinding Key="OemQuestion" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.OemQuestion}"/>
+        <KeyBinding Key="OemPeriod" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.OemPeriod}"/>
+        <KeyBinding Key="Enter" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.Enter}"/>
+        <KeyBinding Key="Back" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.Back}"/>
+        <KeyBinding Key="Escape" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.Escape}"/>
+    </Window.InputBindings>
+
+    <Grid Background="#271d1e">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="10 10 10 0">
+            <TextBlock Text="{Binding Expression}"
+                     FontSize="24"
+                     Foreground="White"
+                     TextTrimming="CharacterEllipsis"
+                     HorizontalAlignment="Right"/>
+            <TextBlock Text="{Binding Result}"
+                     FontSize="32"
+                     Foreground="White"
+                     FontWeight="Bold"
+                     TextTrimming="CharacterEllipsis"
+                     HorizontalAlignment="Right"/>
+        </StackPanel>
+
+        <Grid Grid.Row="2" Margin="10">
             <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
-                <RowDefinition />
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-                <ColumnDefinition />
-                <ColumnDefinition />
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            
-           <!--два текстблока для отображения выражения и результата -->
-            <TextBlock x:Name="ExpressionDisplay" Text="{Binding Expression}"
-           TextAlignment="Left"
-           VerticalAlignment="Center"
-           FontFamily="Times New Roman"
-           FontSize="24"
-           Foreground="White"
-           TextTrimming="CharacterEllipsis"
-           HorizontalAlignment="Stretch"
-           Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4"
-           Padding="0,0,10,0"/>
 
-            <TextBlock x:Name="ResultDisplay" Text="{Binding Result}"
-           TextAlignment="Right"
-           VerticalAlignment="Center"
-           FontFamily="Times New Roman"
-           FontSize="24"
-           Foreground="White"
-           TextTrimming="CharacterEllipsis"
-           HorizontalAlignment="Stretch"
-           Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"
-           Padding="0,0,10,0"/>
+            <Button Grid.Column="0" Grid.Row="0" Content="%" Command="{Binding PercentageCommand}" Style="{StaticResource OperationButtonStyle}"/>
+            <Button Grid.Column="1" Grid.Row="0" Content="CE" Command="{Binding ClearEntryCommand}" Style="{StaticResource OperationButtonStyle}"/>
+            <Button Grid.Column="2" Grid.Row="0" Content="C" Command="{Binding ClearCommand}" Style="{StaticResource OperationButtonStyle}"/>
+            <Button Grid.Column="3" Grid.Row="0" Content="⌫" Command="{Binding BackspaceCommand}" Style="{StaticResource OperationButtonStyle}"/>
 
-            <Button Grid.Column="4" Grid.Row="0" Background="#41393a" FontSize="20" Foreground="White" Click="ShowHistory_Click">История</Button>
+            <Button Grid.Column="0" Grid.Row="1" Content="1/x" Command="{Binding ReciprocalCommand}" Style="{StaticResource OperationButtonStyle}"/>
+            <Button Grid.Column="1" Grid.Row="1" Content="x²" Command="{Binding DegreeCommand}" Style="{StaticResource OperationButtonStyle}"/>
+            <Button Grid.Column="2" Grid.Row="1" Content="√x" Command="{Binding SquareCommand}" Style="{StaticResource OperationButtonStyle}"/>
+            <Button Grid.Column="3" Grid.Row="1" Content="/" Command="{Binding AppendToExpressionCommand}" CommandParameter="/" Style="{StaticResource OperationButtonStyle}"/>
 
-            <!-- кнопки -->
-            <Button Grid.Column="0" Grid.Row="2" Background="#41393a" FontSize="20" Foreground="White" Click="Percentage_Click">%</Button>
-            <Button Grid.Column="1" Grid.Row="2" Background="#41393a" FontSize="20" Foreground="White" Click="ClearEntry_Click">CE</Button>
-            <Button Grid.Column="2" Grid.Row="2" Background="#41393a" FontSize="20" Foreground="White" Click="Clear_Click">C</Button>
-            <Button Grid.Column="3" Grid.Row="2" Background="#41393a" FontSize="20" Foreground="White" Click="Backspace_Click">←</Button>
+            <Button Grid.Column="0" Grid.Row="2" Content="7" Command="{Binding AppendToExpressionCommand}" CommandParameter="7" Style="{StaticResource NumberButtonStyle}"/>
+            <Button Grid.Column="1" Grid.Row="2" Content="8" Command="{Binding AppendToExpressionCommand}" CommandParameter="8" Style="{StaticResource NumberButtonStyle}"/>
+            <Button Grid.Column="2" Grid.Row="2" Content="9" Command="{Binding AppendToExpressionCommand}" CommandParameter="9" Style="{StaticResource NumberButtonStyle}"/>
+            <Button Grid.Column="3" Grid.Row="2" Content="*" Command="{Binding AppendToExpressionCommand}" CommandParameter="*" Style="{StaticResource OperationButtonStyle}"/>
 
-            <Button Grid.Column="0" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White" Click="Reciprocal_Click">1/x</Button>
-            <Button Grid.Column="1" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White" Click="Degree_Click">x²</Button>
-            <Button Grid.Column="2" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White" Click="Square_Click">√x</Button>
-            <Button Grid.Column="3" Grid.Row="3" Background="#41393a" FontSize="20" Foreground="White" Click="Divide_Click">/</Button>
+            <Button Grid.Column="0" Grid.Row="3" Content="4" Command="{Binding AppendToExpressionCommand}" CommandParameter="4" Style="{StaticResource NumberButtonStyle}"/>
+            <Button Grid.Column="1" Grid.Row="3" Content="5" Command="{Binding AppendToExpressionCommand}" CommandParameter="5" Style="{StaticResource NumberButtonStyle}"/>
+            <Button Grid.Column="2" Grid.Row="3" Content="6" Command="{Binding AppendToExpressionCommand}" CommandParameter="6" Style="{StaticResource NumberButtonStyle}"/>
+            <Button Grid.Column="3" Grid.Row="3" Content="-" Command="{Binding AppendToExpressionCommand}" CommandParameter="-" Style="{StaticResource OperationButtonStyle}"/>
 
-            <Button Grid.Column="0" Grid.Row="4" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">7</Button>
-            <Button Grid.Column="1" Grid.Row="4" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">8</Button>
-            <Button Grid.Column="2" Grid.Row="4" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">9</Button>
-            <Button Grid.Column="3" Grid.Row="4" Background="#41393a" FontSize="20" Foreground="White" Click="Multiply_Click">*</Button>
+            <Button Grid.Column="0" Grid.Row="4" Content="1" Command="{Binding AppendToExpressionCommand}" CommandParameter="1" Style="{StaticResource NumberButtonStyle}"/>
+            <Button Grid.Column="1" Grid.Row="4" Content="2" Command="{Binding AppendToExpressionCommand}" CommandParameter="2" Style="{StaticResource NumberButtonStyle}"/>
+            <Button Grid.Column="2" Grid.Row="4" Content="3" Command="{Binding AppendToExpressionCommand}" CommandParameter="3" Style="{StaticResource NumberButtonStyle}"/>
+            <Button Grid.Column="3" Grid.Row="4" Content="+" Command="{Binding AppendToExpressionCommand}" CommandParameter="+" Style="{StaticResource OperationButtonStyle}"/>
 
-            <Button Grid.Column="0" Grid.Row="5" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">4</Button>
-            <Button Grid.Column="1" Grid.Row="5" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">5</Button>
-            <Button Grid.Column="2" Grid.Row="5" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">6</Button>
-            <Button Grid.Column="3" Grid.Row="5" Background="#41393a" FontSize="20" Foreground="White" Click="Subtract_Click">-</Button>
+            <Button Grid.Column="0" Grid.Row="5" Content="+/-" Command="{Binding ToggleSignCommand}" Style="{StaticResource NumberButtonStyle}"/>
+            <Button Grid.Column="1" Grid.Row="5" Content="0" Command="{Binding AppendToExpressionCommand}" CommandParameter="0" Style="{StaticResource NumberButtonStyle}"/>
+            <Button Grid.Column="2" Grid.Row="5" Content="." Command="{Binding AppendToExpressionCommand}" CommandParameter="." Style="{StaticResource NumberButtonStyle}"/>
+            <Button Grid.Column="3" Grid.Row="5" Content="=" Command="{Binding CalculateResultCommand}" Style="{StaticResource EqualsButtonStyle}"/>
 
-            <Button Grid.Column="0" Grid.Row="6" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">1</Button>
-            <Button Grid.Column="1" Grid.Row="6" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">2</Button>
-            <Button Grid.Column="2" Grid.Row="6" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">3</Button>
-            <Button Grid.Column="3" Grid.Row="6" Background="#41393a" FontSize="20" Foreground="White" Click="Add_Click">+</Button>
-
-            <Button Grid.Column="0" Grid.Row="7" Background="#403839" FontSize="20" Foreground="White" Click="ToggleSign_Click">+/-</Button>
-            <Button Grid.Column="1" Grid.Row="7" Background="#403839" FontSize="20" Foreground="White" Click="Number_Click">0</Button>
-            <Button Grid.Column="2" Grid.Row="7" Background="#403839" FontSize="20" Foreground="White" Click="Decimal_Click">.</Button>
-            <Button Grid.Column="3" Grid.Row="7" Background="#595959" FontSize="20" Foreground="White" Click="Equals_Click">=</Button>
+            <Button Grid.Column="0" Grid.Row="6" Content="История" Command="{Binding ShowHistoryWindowCommand}" Style="{StaticResource HistoryButtonStyle}"
+                    Grid.ColumnSpan="4"/>
         </Grid>
     </Grid>
 </Window>

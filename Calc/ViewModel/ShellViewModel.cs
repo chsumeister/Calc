@@ -1,7 +1,11 @@
-﻿using curc_c_.Model;
-using curc_c_.Views;
+﻿using System;
 using System.Windows;
 using System.Windows.Input;
+using curc_c_.Model;
+using Prism.Commands;
+using curc_c_.Views;
+using Prism.Mvvm;
+
 namespace curc_c_.ViewModels
 {
     public class ShellViewModel : BindableBase
@@ -11,48 +15,82 @@ namespace curc_c_.ViewModels
         private string _result = string.Empty;
         private readonly HistoryViewModel _historyViewModel;
 
-        // конструктор с подпиской на события для истории
+        public ICommand AppendToExpressionCommand { get; }
+        public ICommand CalculateResultCommand { get; }
+        public ICommand HandleKeyPressCommand { get; }
+        public ICommand ShowHistoryWindowCommand { get; }
+        public ICommand PercentageCommand { get; }
+        public ICommand ClearEntryCommand { get; }
+        public ICommand ClearCommand { get; }
+        public ICommand BackspaceCommand { get; }
+        public ICommand ReciprocalCommand { get; }
+        public ICommand DegreeCommand { get; }
+        public ICommand SquareCommand { get; }
+        public ICommand ToggleSignCommand { get; }
+
         public ShellViewModel(HistoryViewModel historyViewModel)
         {
             _historyViewModel = historyViewModel;
             _historyViewModel.HistoryEntrySelected += FromHistoryToCalc;
+
+            AppendToExpressionCommand = new DelegateCommand<string>(AppendToExpression);
+            CalculateResultCommand = new DelegateCommand(CalculateResult);
+            HandleKeyPressCommand = new DelegateCommand<object>(param => HandleKeyPress((Key)param));
+            ShowHistoryWindowCommand = new DelegateCommand(ShowHistoryWindow);
+            PercentageCommand = new DelegateCommand(Percentage);
+            ClearEntryCommand = new DelegateCommand(ClearEntry);
+            ClearCommand = new DelegateCommand(Clear);
+            BackspaceCommand = new DelegateCommand(Backspace);
+            ReciprocalCommand = new DelegateCommand(Reciprocal);
+            DegreeCommand = new DelegateCommand(Degree);
+            SquareCommand = new DelegateCommand(Square);
+            ToggleSignCommand = new DelegateCommand(ToggleSign);
+
+            
         }
-        // переносит из истории обратно в калькулятор
+
+        /// <summary>
+        /// Переносит выражение из истории в калькулятор
+        /// </summary>
+        /// <param name="entry">Запись из истории в формате "выражение = результат"</param>
         private void FromHistoryToCalc(string entry)
         {
             var expression = entry.Split('=')[0].Trim();
             Expression = expression;
             CalculateIntermediateResult();
         }
-        // выражение
+
         public string Expression
         {
             get => _expression;
             set => SetProperty(ref _expression, value);
         }
-        // результат
+
         public string Result
         {
             get => _result;
             set => SetProperty(ref _result, value);
         }
 
-        //добавляет символ в выражение (expression) для того, чтобы пересчитывать сразу по типу 1+1+1+1
+        /// <summary>
+        /// Добавляет символ к текущему выражению
+        /// </summary>
+        /// <param name="value">Добавляемый символ</param>
         public void AppendToExpression(string value)
         {
             Expression += value;
             CalculateIntermediateResult();
         }
 
-        //подсчитывает результат
+        /// <summary>
+        /// Вычисляет и отображает результат выражения
+        /// </summary>
         public void CalculateResult()
         {
             try
             {
                 var result = _calculator.EvaluateExpression(Expression);
                 Result = result.ToString();
-
-                // переносит выраж и результат в историю
                 _historyViewModel.AddEntry($"{Expression} = {Result}");
             }
             catch
@@ -60,7 +98,10 @@ namespace curc_c_.ViewModels
                 Result = "Error";
             }
         }
-        //подсчитывает промежуточный результат 
+
+        /// <summary>
+        /// Вычисляет промежуточный результат выражения
+        /// </summary>
         private void CalculateIntermediateResult()
         {
             try
@@ -73,10 +114,13 @@ namespace curc_c_.ViewModels
                 Result = "Error";
             }
         }
-        // это чтобы с клавиатуры вводилось в калькулятор
+
+        /// <summary>
+        /// Обрабатывает нажатия клавиш клавиатуры
+        /// </summary>
+        /// <param name="key">Нажатая клавиша</param>
         public void HandleKeyPress(Key key)
         {
-            // Проверяем состояние Shift
             bool isShiftPressed = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
 
             switch (key)
@@ -107,42 +151,50 @@ namespace curc_c_.ViewModels
                     break;
                 case Key.D8:
                     if (isShiftPressed)
-                        AppendToExpression("*"); // тут shift+8 для умножения, думаю понятно
-                    else
-                        AppendToExpression("8");
+                    {
+                        AppendToExpression("*");
+                        return;
+                    }
+                    AppendToExpression("8");
                     break;
                 case Key.D9:
+                case Key.NumPad9:
                     AppendToExpression("9");
                     break;
+                case Key.Add:
                 case Key.OemPlus:
                     AppendToExpression("+");
                     break;
+                case Key.Subtract:
                 case Key.OemMinus:
                     AppendToExpression("-");
                     break;
+                case Key.Multiply:
+                    AppendToExpression("*");
+                    break;
+                case Key.Divide:
                 case Key.OemQuestion:
                     AppendToExpression("/");
                     break;
+                case Key.Decimal:
                 case Key.OemPeriod:
                     AppendToExpression(".");
                     break;
-                //это управление типо энтер это равно бекспейс это 1 символ удалить а эскейп все выражение
                 case Key.Enter:
                     CalculateResult();
                     break;
                 case Key.Back:
-                    if (Expression.Length > 0)
-                    {
-                        Expression = Expression.Substring(0, Expression.Length - 1);
-                    }
+                    Backspace();
                     break;
                 case Key.Escape:
-                    Expression = string.Empty;
-                    Result = string.Empty;
+                    Clear();
                     break;
             }
         }
-        // в проценты
+
+        /// <summary>
+        /// Преобразует текущее выражение в проценты
+        /// </summary>
         public void Percentage()
         {
             if (double.TryParse(Expression, out double number))
@@ -150,18 +202,26 @@ namespace curc_c_.ViewModels
                 Expression = (number / 100).ToString();
             }
         }
-        // очистка выражения
+
+        /// <summary>
+        /// Очищает текущее выражение
+        /// </summary>
         public void ClearEntry()
         {
             Expression = string.Empty;
         }
-
+        /// <summary>
+        /// Полностью очищает калькулятор (выражение и результат)
+        /// </summary>
         public void Clear()
         {
             Expression = string.Empty;
             Result = string.Empty;
         }
-        // последний введеный символ удаляет
+
+        /// <summary>
+        /// Удаляет последний символ из выражения
+        /// </summary>
         public void Backspace()
         {
             if (Expression.Length > 0)
@@ -169,7 +229,10 @@ namespace curc_c_.ViewModels
                 Expression = Expression.Substring(0, Expression.Length - 1);
             }
         }
-        // это 1/x
+
+        /// <summary>
+        /// Вычисляет обратную величину текущего числа
+        /// </summary>
         public void Reciprocal()
         {
             if (double.TryParse(Expression, out double number))
@@ -177,7 +240,10 @@ namespace curc_c_.ViewModels
                 Expression = (1 / number).ToString();
             }
         }
-        // это квадрат
+
+        /// <summary>
+        /// Возводит текущее число в квадрат
+        /// </summary>
         public void Degree()
         {
             if (double.TryParse(Expression, out double number))
@@ -185,7 +251,10 @@ namespace curc_c_.ViewModels
                 Expression = (number * number).ToString();
             }
         }
-        // это корень
+
+        /// <summary>
+        /// Вычисляет квадратный корень из текущего числа
+        /// </summary>
         public void Square()
         {
             if (double.TryParse(Expression, out double number))
@@ -193,7 +262,10 @@ namespace curc_c_.ViewModels
                 Expression = Math.Sqrt(number).ToString();
             }
         }
-        // открывает историю
+
+        /// <summary>
+        /// Открывает окно истории вычислений
+        /// </summary>
         public void ShowHistoryWindow()
         {
             var historyView = new HistoryView();
@@ -201,7 +273,10 @@ namespace curc_c_.ViewModels
             historyView.Owner = Application.Current.MainWindow;
             historyView.ShowDialog();
         }
-        // x = -x
+
+        /// <summary>
+        /// Меняет знак текущего числа
+        /// </summary>
         public void ToggleSign()
         {
             if (double.TryParse(Expression, out double number))

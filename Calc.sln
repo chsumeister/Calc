@@ -3,7 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Calc", "Calc\Calc.csproj", "{0CF4C9BB-2276-4E86-96D0-1731630406EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Calc", "Calc\Calc.csproj", "{0CF4C9BB-2276-4E86-96D0-1731630406EF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{14014B0B-C368-4B7B-BCA8-F3A79D4BEFDD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Calc.Shell", "Calc.Shell\Calc.Shell.csproj", "{7078699B-915B-40A0-9E2F-D95DA3B29134}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0CF4C9BB-2276-4E86-96D0-1731630406EF} = {0CF4C9BB-2276-4E86-96D0-1731630406EF}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +22,10 @@ Global
 		{0CF4C9BB-2276-4E86-96D0-1731630406EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0CF4C9BB-2276-4E86-96D0-1731630406EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0CF4C9BB-2276-4E86-96D0-1731630406EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7078699B-915B-40A0-9E2F-D95DA3B29134}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7078699B-915B-40A0-9E2F-D95DA3B29134}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7078699B-915B-40A0-9E2F-D95DA3B29134}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7078699B-915B-40A0-9E2F-D95DA3B29134}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

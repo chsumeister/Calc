@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace curc_c_.Views
+namespace Calc.Shell.Views
 {
     public partial class ShellView : Window
     {
