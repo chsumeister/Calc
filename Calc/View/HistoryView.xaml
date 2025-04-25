@@ -1,0 +1,100 @@
+﻿<UserControl x:Class="HistoryV.View.HistoryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="400">
+
+    <Grid Background="#271d1e">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+              Grid.Row="0"
+              Background="#271d1e"
+              Padding="0"
+              Focusable="False">
+            <ListBox ItemsSource="{Binding Entries}"
+             SelectedItem="{Binding SelectedHistoryEntry, Mode=TwoWay}"
+             FontSize="18"
+             Background="#271d1e"
+             Foreground="{Binding HistoryTextColor}"
+             BorderThickness="0"
+             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+             Padding="10"
+             HorizontalContentAlignment="Stretch">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border CornerRadius="10"
+                        Background="#2e2526"
+                        BorderBrush="#555"
+                        BorderThickness="1"
+                        Margin="0,5,0,5"
+                        Padding="10"
+                        HorizontalAlignment="Stretch">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel>
+                                    <TextBlock Text="{Binding}" FontWeight="Bold" TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding Source={x:Static sys:DateTime.Now}, StringFormat='{}{0:dd.MM.yyyy}'}"
+                                       FontSize="10"
+                                       Foreground="LightGray"
+                                       Margin="0,5,0,0"/>
+                                </StackPanel>
+
+                                <Button Grid.Column="1"
+                                FontFamily="Segoe MDL2 Assets"
+                                Content=""
+                                Width="32" Height="32"
+                                FontSize="12"
+                                Margin="5"
+                                Background="#444"
+                                BorderBrush="#555"
+                                Foreground="White"
+                                BorderThickness="1"
+                                ToolTip="Удалить запись"
+                                Command="{Binding DataContext.DeleteEntryCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                CommandParameter="{Binding}"
+                                Style="{StaticResource HistoryButtonStyle}"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="10">
+            <Button Command="{Binding ClearHistoryCommand}"
+                    FontFamily="Segoe MDL2 Assets"
+                    Content=""
+                    FontSize="20"
+                    Width="40"
+                    Height="40"
+                    ToolTip="Очистить историю"
+                    Style="{StaticResource HistoryButtonStyle}"
+                    Margin="0,0,10,0"/>
+
+            <Button Command="{Binding CloseHistoryCommand}"
+                    FontFamily="Segoe MDL2 Assets"
+                    Content=""
+                    FontSize="20"
+                    Width="40"
+                    Height="40"
+                    ToolTip="Назад"
+                    Style="{StaticResource HistoryButtonStyle}"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

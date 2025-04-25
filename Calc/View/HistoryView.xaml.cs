@@ -1,12 +1,14 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 
-namespace curc_c_.Views
+namespace HistoryV.View
 {
-    public partial class HistoryView : Window
+    public partial class HistoryView : UserControl
     {
         public HistoryView()
         {
             InitializeComponent();
         }
+
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace curc_c_.Model
+namespace Calc.Model
 {
-    internal class History
+    public class History
     {
         public IReadOnlyList<string> Entries { get; }
 
