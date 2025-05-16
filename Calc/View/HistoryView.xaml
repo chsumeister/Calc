@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:prism="http://prismlibrary.com/"
-             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="400">
@@ -16,28 +15,28 @@
         </Grid.RowDefinitions>
 
         <ScrollViewer VerticalScrollBarVisibility="Auto"
-              Grid.Row="0"
-              Background="#271d1e"
-              Padding="0"
-              Focusable="False">
+                      Grid.Row="0"
+                      Background="#271d1e"
+                      Padding="0"
+                      Focusable="False">
             <ListBox ItemsSource="{Binding Entries}"
-             SelectedItem="{Binding SelectedHistoryEntry, Mode=TwoWay}"
-             FontSize="18"
-             Background="#271d1e"
-             Foreground="{Binding HistoryTextColor}"
-             BorderThickness="0"
-             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-             Padding="10"
-             HorizontalContentAlignment="Stretch">
+                     SelectedItem="{Binding SelectedHistoryEntry, Mode=TwoWay}"
+                     FontSize="18"
+                     Background="#271d1e"
+                     Foreground="{Binding HistoryTextColor}"
+                     BorderThickness="0"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     Padding="10"
+                     HorizontalContentAlignment="Stretch">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Border CornerRadius="10"
-                        Background="#2e2526"
-                        BorderBrush="#555"
-                        BorderThickness="1"
-                        Margin="0,5,0,5"
-                        Padding="10"
-                        HorizontalAlignment="Stretch">
+                                Background="#2e2526"
+                                BorderBrush="#555"
+                                BorderThickness="1"
+                                Margin="0,5,0,5"
+                                Padding="10"
+                                HorizontalAlignment="Stretch">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -45,27 +44,29 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel>
-                                    <TextBlock Text="{Binding}" FontWeight="Bold" TextWrapping="Wrap"/>
-                                    <TextBlock Text="{Binding Source={x:Static sys:DateTime.Now}, StringFormat='{}{0:dd.MM.yyyy}'}"
-                                       FontSize="10"
-                                       Foreground="LightGray"
-                                       Margin="0,5,0,0"/>
+                                    <TextBlock Text="{Binding Expression}"
+                                               FontWeight="Bold"
+                                               TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding Timestamp, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}"
+                                               FontSize="10"
+                                               Foreground="LightGray"
+                                               Margin="0,5,0,0"/>
                                 </StackPanel>
 
                                 <Button Grid.Column="1"
-                                FontFamily="Segoe MDL2 Assets"
-                                Content=""
-                                Width="32" Height="32"
-                                FontSize="12"
-                                Margin="5"
-                                Background="#444"
-                                BorderBrush="#555"
-                                Foreground="White"
-                                BorderThickness="1"
-                                ToolTip="Удалить запись"
-                                Command="{Binding DataContext.DeleteEntryCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                CommandParameter="{Binding}"
-                                Style="{StaticResource HistoryButtonStyle}"/>
+                                        FontFamily="Segoe MDL2 Assets"
+                                        Content=""
+                                        Width="32" Height="32"
+                                        FontSize="12"
+                                        Margin="5"
+                                        Background="#444"
+                                        BorderBrush="#555"
+                                        Foreground="White"
+                                        BorderThickness="1"
+                                        ToolTip="Удалить запись"
+                                        Command="{Binding DataContext.DeleteEntryCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                        CommandParameter="{Binding}"
+                                        Style="{StaticResource HistoryButtonStyle}"/>
                             </Grid>
                         </Border>
                     </DataTemplate>

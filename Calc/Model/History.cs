@@ -1,14 +1,22 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Calc.Model
 {
     public class History
     {
-        public IReadOnlyList<string> Entries { get; }
+        [JsonInclude]
+        public List<HistoryEntry> Entries { get; private set; }
 
-        public History(IEnumerable<string> entries)
+        [JsonConstructor]
+        public History(List<HistoryEntry> entries)
         {
-            Entries = new List<string>(entries).AsReadOnly();
+            Entries = entries ?? new List<HistoryEntry>();
+        }
+
+        public History(IEnumerable<HistoryEntry> entries)
+        {
+            Entries = new List<HistoryEntry>(entries);
         }
     }
 }

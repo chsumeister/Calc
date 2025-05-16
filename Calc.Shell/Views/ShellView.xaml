@@ -33,8 +33,6 @@
         <KeyBinding Key="D8" Command="{Binding AppendToExpressionCommand}" CommandParameter="8"/>
         <KeyBinding Key="D8" Modifiers="Shift" Command="{Binding HandleKeyPressCommand}" CommandParameter="{x:Static Key.D8}"/>
         <KeyBinding Key="D9" Command="{Binding AppendToExpressionCommand}" CommandParameter="9"/>
-        <KeyBinding Key="D0" Modifiers="Shift" Command="{Binding AppendToExpressionCommand}" CommandParameter=")"/>
-        <KeyBinding Key="D9" Modifiers="Shift" Command="{Binding AppendToExpressionCommand}" CommandParameter="("/>
         <KeyBinding Key="OemPlus" Command="{Binding AppendToExpressionCommand}" CommandParameter="+"/>
         <KeyBinding Key="OemMinus" Command="{Binding AppendToExpressionCommand}" CommandParameter="-"/>
         <KeyBinding Key="Oem2" Command="{Binding AppendToExpressionCommand}" CommandParameter="/"/>
@@ -69,19 +67,31 @@
                         BorderThickness="1"
                         CornerRadius="8"
                         Padding="10"
-                        Margin="0,0,0,4">
+                        Margin="0,0,0,0">
                     <StackPanel>
-                        <TextBlock Text="{Binding Expression}"
-                                   FontSize="24"
-                                   Foreground="{Binding ExpressionColor}"
-                                   HorizontalAlignment="Right"
-                                   TextTrimming="CharacterEllipsis"/>
+                        <ScrollViewer x:Name="ExpressionScrollViewer"
+              HorizontalScrollBarVisibility="Hidden"
+              VerticalScrollBarVisibility="Disabled"
+              HorizontalAlignment="Stretch"
+              FlowDirection="RightToLeft"
+              PanningMode="HorizontalOnly"
+              CanContentScroll="False"
+              Padding="0,0,40,0">
+                            <TextBlock Text="{Binding Expression}"
+               FontSize="28"
+               Foreground="{Binding ExpressionColor}"
+               TextWrapping="NoWrap"
+               TextTrimming="None"
+               HorizontalAlignment="Left"
+               FlowDirection="LeftToRight"
+               Margin="0" />
+                        </ScrollViewer>
                         <TextBlock Text="{Binding Result}"
                                    FontSize="32"
                                    Foreground="White"
                                    FontWeight="Bold"
                                    HorizontalAlignment="Right"
-                                   Margin="0,5,0,0"/>
+                                   Margin="0,0,0,0"/>
                     </StackPanel>
                 </Border>
 
@@ -132,7 +142,7 @@
                     <Button Grid.Column="3" Grid.Row="0" Content="⌫" Command="{Binding BackspaceCommand}" Style="{StaticResource OperationButtonStyle}"/>
 
                     <Button Grid.Column="0" Grid.Row="1" Content="1/x" Command="{Binding ReciprocalCommand}" Style="{StaticResource OperationButtonStyle}"/>
-                    <Button Grid.Column="1" Grid.Row="1" Content="x²" Command="{Binding DegreeCommand}" Style="{StaticResource OperationButtonStyle}"/>
+                    <Button Grid.Column="1" Grid.Row="1" Content="xⁿ" Command="{Binding DegreeCommand}" Style="{StaticResource OperationButtonStyle}"/>
                     <Button Grid.Column="2" Grid.Row="1" Content="√x" Command="{Binding SquareCommand}" Style="{StaticResource OperationButtonStyle}"/>
                     <Button Grid.Column="3" Grid.Row="1" Content="/" Command="{Binding AppendToExpressionCommand}" CommandParameter="/" Style="{StaticResource OperationButtonStyle}"/>
 

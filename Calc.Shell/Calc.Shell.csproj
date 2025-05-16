@@ -18,7 +18,7 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Resource Include="Images\CalculatorIcon.ico">
-	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Resource>
 	</ItemGroup>
 </Project>

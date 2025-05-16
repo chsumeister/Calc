@@ -1,13 +1,14 @@
-﻿using System;
+﻿using Calc.Model;
+using Calc.Shell;
+using Calc.ViewModels;
+using DryIoc.ImTools;
+using Prism.Commands;
+using Prism.Mvvm;
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
 using System.Windows.Media;
-using Calc.Model;
-using Calc.Shell;
-using Calc.ViewModels;
-using Prism.Commands;
-using Prism.Mvvm;
 
 namespace Calc.ViewModel
 {
@@ -79,7 +80,13 @@ namespace Calc.ViewModel
         public string Result
         {
             get => _result;
-            set => SetProperty(ref _result, value);
+            set
+            {
+                if (value.Length > 18)
+                    value = value.Substring(0, 18);
+
+                SetProperty(ref _result, value);
+            }
         }
 
         public bool IsHistoryVisible
@@ -121,6 +128,9 @@ namespace Calc.ViewModel
                 return;
             }
 
+            if (value == "%" && Expression.EndsWith("%"))
+                return;
+
             Expression += value;
             CalculateIntermediateResult();
         }
@@ -158,7 +168,7 @@ namespace Calc.ViewModel
                 var prepared = PrepareExpression(Expression);
                 var result = _calculator.EvaluateExpression(prepared);
 
-                if (double.IsInfinity(result) || double.IsNaN(result))
+                if ((double.IsInfinity(result) || double.IsNaN(result)) && prepared.Contains("/0"))
                 {
                     Result = "Делить на 0 нельзя";
                     return;
@@ -183,7 +193,7 @@ namespace Calc.ViewModel
                 var prepared = PrepareExpression(Expression);
                 var result = _calculator.EvaluateExpression(prepared);
 
-                if (double.IsInfinity(result) || double.IsNaN(result))
+                if ((double.IsInfinity(result) || double.IsNaN(result)) && prepared.Contains("/0"))
                 {
                     Result = "Делить на 0 нельзя";
                     return;
@@ -193,7 +203,7 @@ namespace Calc.ViewModel
             }
             catch
             {
-                // чтобы выводило прошлый результат
+                // оставить предыдущий результат
             }
         }
 
@@ -216,8 +226,8 @@ namespace Calc.ViewModel
                 case Key.D6: AppendToExpression("6"); break;
                 case Key.D7: AppendToExpression("7"); break;
                 case Key.D8: AppendToExpression(isShiftPressed ? "*" : "8"); break;
-                case Key.D9: AppendToExpression(isShiftPressed ? "(" : "9"); break;
-                case Key.D0: AppendToExpression(isShiftPressed ? ")" : "0"); break;
+                case Key.D9: AppendToExpression("9"); break;
+                case Key.D0: AppendToExpression("0"); break;
                 case Key.OemPlus: AppendToExpression("+"); break;
                 case Key.OemMinus: AppendToExpression("-"); break;
                 case Key.Multiply: AppendToExpression("*"); break;
@@ -278,6 +288,11 @@ namespace Calc.ViewModel
             if (match.Success)
             {
                 var lastNumber = match.Value;
+
+
+                if (lastNumber.StartsWith("√") || Expression.EndsWith($"√{lastNumber}"))
+                    return;
+
                 Expression = Expression.Substring(0, match.Index) + $"√{lastNumber}";
                 CalculateIntermediateResult();
             }
