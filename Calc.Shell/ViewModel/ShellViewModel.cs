@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Globalization;
 
 namespace Calc.ViewModel
 {
@@ -113,7 +114,19 @@ namespace Calc.ViewModel
         /// <param name="value">Значение для добавления.</param>
         private void AppendToExpression(string value)
         {
-            if (string.IsNullOrEmpty(value)) return;
+            if (string.IsNullOrEmpty(value))
+                return;
+
+            if (char.IsDigit(value[0]) && Expression.EndsWith(")"))
+                return;
+
+            if (Expression.EndsWith("^") && !(value == "-" || char.IsDigit(value[0])))
+                return;
+
+            string[] binaryOperators = { "+", "*", "/", "%" };
+
+            if (string.IsNullOrEmpty(Expression) && binaryOperators.Contains(value))
+                return;
 
             string[] operators = { "+", "-", "*", "/" };
 
@@ -131,6 +144,19 @@ namespace Calc.ViewModel
             if (value == "%" && Expression.EndsWith("%"))
                 return;
 
+
+            if (value == "^")
+            {
+                if (string.IsNullOrEmpty(Expression))
+                    return;
+
+                if (operators.Contains(Expression.Last().ToString()))
+                    return;
+
+                if (Expression.Contains("^") && !Expression.Split('^').Last().Contains(")"))
+                    return;
+            }
+
             Expression += value;
             CalculateIntermediateResult();
         }
@@ -144,20 +170,39 @@ namespace Calc.ViewModel
         {
             expr = expr.Replace(" ", "");
 
-            expr = Regex.Replace(expr, @"√(\d+(\.\d+)?|\([^()]*\))", "sqrt($1)");
+            expr = Regex.Replace(expr, @"(?<![\w.])(\d+)(?![\w.])", "$1.0");
 
-            expr = Regex.Replace(expr, @"(\d+(\.\d+)?|\([^()]*\))\^(\d+(\.\d+)?)?", m =>
+            expr = Regex.Replace(expr, @"√(\([^()]*\)|\d+(\.\d+)?)(\^(-?\d+(\.\d+)?|\([^()]*\)))?", m =>
             {
-                var baseVal = m.Groups[1].Value;
-                var exponent = m.Groups[3].Success ? m.Groups[3].Value : "";
-                return exponent == "" ? $"pow({baseVal}," : $"pow({baseVal},{exponent})";
+                string baseExpr = m.Groups[1].Value;
+                string exponent = m.Groups[3].Success ? m.Groups[3].Value : "";
+                string sqrtExpr = $"sqrt({baseExpr})";
+                return string.IsNullOrEmpty(exponent) ? sqrtExpr : $"{sqrtExpr}{exponent}";
             });
 
-            expr = Regex.Replace(expr, @"(\d+(\.\d+)?|\([^()]*\))%", "($1*0.01)");
+            expr = Regex.Replace(expr, @"(\d+(\.\d+)?|\([^()]*\)|sqrt\([^()]*\))(\^(-?\d+(\.\d+)?|\([^()]*\)|sqrt\([^()]*\))){1,}", m => TransformPowers(m.Value));
+
+            expr = Regex.Replace(expr, @"(\d+(\.\d+)?|\([^()]*\)|sqrt\([^()]*\))%", "($1*0.01)");
 
             return expr;
         }
+        /// <summary>
+        /// Преобразует выражение с операцией возведения в степень
+        /// в эквивалентный формат с использованием функции pow(base, exponent).
+        /// Например: "2^3^2" → "pow(2,pow(3,2))"
+        /// </summary>
+        private string TransformPowers(string expr)
+        {
+            var parts = expr.Split('^').Reverse().ToArray();
 
+            string result = parts[0];
+            for (int i = 1; i < parts.Length; i++)
+            {
+                result = $"pow({parts[i]},{result})";
+            }
+
+            return result;
+        }
         /// <summary>
         /// Вычисляет итоговый результат выражения и сохраняет в историю.
         /// </summary>
@@ -174,7 +219,9 @@ namespace Calc.ViewModel
                     return;
                 }
 
-                Result = result.ToString();
+                result = Math.Round(result, 6);
+
+                Result = result.ToString("G", CultureInfo.InvariantCulture);
                 _historyViewModel.AddEntry($"{Expression} = {Result}");
             }
             catch
@@ -188,6 +235,12 @@ namespace Calc.ViewModel
         /// </summary>
         private void CalculateIntermediateResult()
         {
+            if (string.IsNullOrEmpty(Expression))
+            {
+                Result = string.Empty;
+                return;
+            }
+
             try
             {
                 var prepared = PrepareExpression(Expression);
@@ -199,11 +252,16 @@ namespace Calc.ViewModel
                     return;
                 }
 
-                Result = result.ToString();
+                result = Math.Round(result, 6);
+
+                Result = result.ToString("G", CultureInfo.InvariantCulture);
             }
             catch
             {
-                // оставить предыдущий результат
+                if (string.IsNullOrEmpty(Expression))
+                {
+                    Result = string.Empty;
+                }
             }
         }
 
@@ -303,11 +361,39 @@ namespace Calc.ViewModel
         /// </summary>
         private void ToggleSign()
         {
-            if (double.TryParse(Expression, out double number))
+            if (string.IsNullOrEmpty(Expression))
             {
-                Expression = (-number).ToString();
+                if (!string.IsNullOrEmpty(Result))
+                {
+                    if (double.TryParse(Result, out double number))
+                    {
+                        Result = (-number).ToString();
+                        Expression = Result;
+                    }
+                }
+                return;
+            }
+
+            try
+            {
+                var prepared = PrepareExpression(Expression);
+                var currentValue = _calculator.EvaluateExpression(prepared);
+
+                var invertedValue = -currentValue;
+                Expression = invertedValue.ToString();
                 Result = Expression;
-                _historyViewModel.AddEntry($"-({number}) = {Expression}");
+            }
+            catch
+            {
+                if (!Expression.StartsWith("-"))
+                {
+                    Expression = "-" + Expression;
+                }
+                else
+                {
+                    Expression = Expression.Substring(1);
+                }
+                CalculateIntermediateResult();
             }
         }
 
@@ -331,7 +417,10 @@ namespace Calc.ViewModel
         private void Backspace()
         {
             if (Expression.Length > 0)
+            {
                 Expression = Expression.Substring(0, Expression.Length - 1);
+                CalculateIntermediateResult();
+            }
         }
     }
 }
