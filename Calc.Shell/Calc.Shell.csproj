@@ -1,31 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <UseWPF>true</UseWPF>
-    <PackageIcon>CalculatorIcon.ico</PackageIcon>
-  </PropertyGroup>
-  <ItemGroup>
-    <None Remove="Images\CalculatorIcon.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\..\Рабочий стол\CalculatorIcon.ico">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.4" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
-    <PackageReference Include="ncalc" Version="1.3.8" />
-  </ItemGroup>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<ApplicationIcon>Images\CalculatorIcon.ico</ApplicationIcon>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Include="Images\CalculatorIcon.ico" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
+		<PackageReference Include="ncalc" Version="1.3.8" />
+	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Calc\History.Lib.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Resource Include="Images\CalculatorIcon.ico">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </Resource>
+		<Resource Include="Images\CalculatorIcon.ico">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Resource>
 	</ItemGroup>
 </Project>
