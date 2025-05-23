@@ -164,6 +164,16 @@ namespace Calc.ViewModel
                 return;
             }
 
+            if (Expression.EndsWith("!") && (char.IsDigit(value[0]) || value == "."))
+                return;
+
+            if (Expression.EndsWith("!") && "+-*/%^".Contains(value))
+            {
+                Expression += value;
+                ScrollExpressionToEndRequested?.Invoke();
+                return;
+            }
+
             if (char.IsDigit(value[0]) && Expression.EndsWith(")"))
                 return;
 
@@ -202,7 +212,7 @@ namespace Calc.ViewModel
 
             if (value == ".")
             {
-                if (Expression.Length == 0 || "+-*/(".Contains(Expression.Last()))
+                if (Expression.Length == 0 || "+-*/".Contains(Expression.Last()))
                 {
                     Expression += "0.";
                     CalculateIntermediateResult();
