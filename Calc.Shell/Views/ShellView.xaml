@@ -24,6 +24,7 @@
         <KeyBinding Key="Escape" Command="{Binding ClearCommand}" />
         <KeyBinding Key="D0" Command="{Binding AppendToExpressionCommand}" CommandParameter="0"/>
         <KeyBinding Key="D1" Command="{Binding AppendToExpressionCommand}" CommandParameter="1"/>
+        <KeyBinding Key="D1" Modifiers="Shift" Command="{Binding AppendToExpressionCommand}" CommandParameter="!"/>
         <KeyBinding Key="D2" Command="{Binding AppendToExpressionCommand}" CommandParameter="2"/>
         <KeyBinding Key="D3" Command="{Binding AppendToExpressionCommand}" CommandParameter="3"/>
         <KeyBinding Key="D4" Command="{Binding AppendToExpressionCommand}" CommandParameter="4"/>
@@ -144,7 +145,7 @@
                     <Button Grid.Column="2" Grid.Row="0" Content="C" Command="{Binding ClearCommand}" Style="{StaticResource OperationButtonStyle}"/>
                     <Button Grid.Column="3" Grid.Row="0" Content="⌫" Command="{Binding BackspaceCommand}" Style="{StaticResource OperationButtonStyle}"/>
 
-                    <Button Grid.Column="0" Grid.Row="1" Content="1/x" Command="{Binding ReciprocalCommand}" Style="{StaticResource OperationButtonStyle}"/>
+                    <Button Grid.Column="0" Grid.Row="1" Content="x!" Command="{Binding AppendToExpressionCommand}" CommandParameter="!" Style="{StaticResource OperationButtonStyle}"/>
                     <Button Grid.Column="1" Grid.Row="1" Content="xⁿ" Command="{Binding DegreeCommand}" Style="{StaticResource OperationButtonStyle}"/>
                     <Button Grid.Column="2" Grid.Row="1" Content="√x" Command="{Binding SquareCommand}" Style="{StaticResource OperationButtonStyle}"/>
                     <Button Grid.Column="3" Grid.Row="1" Content="/" Command="{Binding AppendToExpressionCommand}" CommandParameter="/" Style="{StaticResource OperationButtonStyle}"/>

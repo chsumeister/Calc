@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Globalization;
 using System.Windows;
 using System.Diagnostics;
+using System.Numerics;
 
 namespace Calc.ViewModel
 {
@@ -99,7 +100,7 @@ namespace Calc.ViewModel
             ClearEntryCommand = new DelegateCommand(ClearEntry);
             ClearCommand = new DelegateCommand(Clear);
             BackspaceCommand = new DelegateCommand(Backspace);
-            ReciprocalCommand = new DelegateCommand(ApplyReciprocal);
+            FactorialCommand = new DelegateCommand(ApplyFactorial);
             DegreeCommand = new DelegateCommand(ApplyDegree);
             SquareCommand = new DelegateCommand(ApplySquareRoot);
             ToggleSignCommand = new DelegateCommand(ToggleSign);
@@ -121,7 +122,7 @@ namespace Calc.ViewModel
         public ICommand ClearEntryCommand { get; }
         public ICommand ClearCommand { get; }
         public ICommand BackspaceCommand { get; }
-        public ICommand ReciprocalCommand { get; }
+        public ICommand FactorialCommand { get; }
         public ICommand DegreeCommand { get; }
         public ICommand SquareCommand { get; }
         public ICommand ToggleSignCommand { get; }
@@ -144,22 +145,44 @@ namespace Calc.ViewModel
         /// <param name="value">Значение для добавления.</param>
         private void AppendToExpression(string value)
         {
+
             if (string.IsNullOrEmpty(value))
                 return;
 
+            string[] binaryOperators = { "+", "*", "/", "%" };
+            string[] operatorsForCheck = { "+", "-", "*", "/", "!" };
+
+            if (value == "!")
+            {
+                string pattern = @"(\d+)$";
+                var match = Regex.Match(Expression, pattern);
+                if (!match.Success)
+                    return;
+
+                Expression = Expression.Insert(match.Index + match.Length, "!");
+                CalculateIntermediateResult();
+                return;
+            }
 
             if (char.IsDigit(value[0]) && Expression.EndsWith(")"))
                 return;
 
-            string[] binaryOperators = { "+", "*", "/", "%" };
             if (string.IsNullOrEmpty(Expression) && binaryOperators.Contains(value))
                 return;
 
-            string[] operatorsForCheck = { "+", "-", "*", "/" };
-            if (Expression.Length > 0 &&
-                operatorsForCheck.Contains(Expression.Last().ToString()) &&
-                operatorsForCheck.Contains(value))
+            if ("+*/%.".Contains(value) && Expression.EndsWith("^"))
                 return;
+
+            if (operatorsForCheck.Contains(value) && Expression.Length > 0)
+            {
+                var lastChar = Expression.Last().ToString();
+                if (operatorsForCheck.Contains(lastChar))
+                {
+                    Expression = Expression.Substring(0, Expression.Length - 1) + value;
+                    ScrollExpressionToEndRequested?.Invoke();
+                    return;
+                }
+            }
 
             if (Expression.Length == 0 && value == "-")
             {
@@ -169,6 +192,13 @@ namespace Calc.ViewModel
 
             if (Expression.EndsWith("%") && (char.IsDigit(value[0]) || value == "."))
                 return;
+
+            if (value == "%" && Expression.Length > 0)
+            {
+                var lastChar = Expression.Last().ToString();
+                if (operatorsForCheck.Contains(lastChar) || lastChar == "(")
+                    return;
+            }
 
             if (value == ".")
             {
@@ -190,7 +220,7 @@ namespace Calc.ViewModel
                 return;
             }
 
-            if ("+-*/%".Contains(value) && Expression.EndsWith("."))
+            if ("+-*/%!".Contains(value) && Expression.EndsWith("."))
                 return;
 
             if (value == "^")
@@ -210,7 +240,7 @@ namespace Calc.ViewModel
 
             if (char.IsDigit(value[0]) && value != ".")
             {
-                string[] operators = { "+", "-", "*", "/", "%" };
+                string[] operators = { "+", "-", "*", "/", "%", "!"};
                 int lastOperatorIndex = -1;
                 for (int i = Expression.Length - 1; i >= 0; i--)
                 {
@@ -239,10 +269,12 @@ namespace Calc.ViewModel
                     return;
                 }
             }
+
             Expression += value;
             CalculateIntermediateResult();
             ScrollExpressionToEndRequested?.Invoke();
         }
+
 
         /// <summary>
         /// Подготавливает выражение для вычисления (корни, степени, проценты).
@@ -253,22 +285,32 @@ namespace Calc.ViewModel
         {
             expr = expr.Replace(" ", "");
 
-            expr = Regex.Replace(expr, @"(?<![\w.])(\d+)(?![\w.])", "$1.0");
+            expr = Regex.Replace(expr, @"(\d+(\.\d+)?)!", m =>
+            {
+                string number = m.Groups[1].Value;
+                return $"factorial({number})";
+            });
 
-            expr = Regex.Replace(expr, @"√(\([^()]*\)|\d+(\.\d+)?)(\^(-?\d+(\.\d+)?|\([^()]*\)))?", m =>
+            expr = Regex.Replace(expr, @"√(\([^()]*\)|factorial\(\d+(\.\d+)?\)|\d+(\.\d+)?)(\^(-?\d+(\.\d+)?|\([^()]*\)))?", m =>
             {
                 string baseExpr = m.Groups[1].Value;
-                string exponent = m.Groups[3].Success ? m.Groups[3].Value : "";
+                string exponent = m.Groups[4].Success ? m.Groups[4].Value : "";
                 string sqrtExpr = $"sqrt({baseExpr})";
                 return string.IsNullOrEmpty(exponent) ? sqrtExpr : $"{sqrtExpr}{exponent}";
             });
 
-            expr = Regex.Replace(expr, @"(\d+(\.\d+)?|\([^()]*\)|sqrt\([^()]*\))(\^(-?\d+(\.\d+)?|\([^()]*\)|sqrt\([^()]*\))){1,}", m => TransformPowers(m.Value));
-
             expr = Regex.Replace(expr, @"(\d+(\.\d+)?|\([^()]*\)|sqrt\([^()]*\))%", "($1*0.01)");
+
+            string powerPattern = @"(\d+(\.\d+)?|factorial\(\d+(\.\d+)?\)|\([^()]*\)(!)?|sqrt\([^()]*\)(!)?)(\^(-?\d+(\.\d+)?|factorial\(\d+(\.\d+)?\)|\([^()]*\)(!)?|sqrt\([^()]*\)(!)?)){1,}";
+
+            expr = Regex.Replace(expr, powerPattern, m => TransformPowers(m.Value));
+
+            expr = Regex.Replace(expr, @"(?<![\w.])(\d+)(?![\w.])", "$1.0");
 
             return expr;
         }
+
+
 
         /// <summary>
         /// Преобразует выражение с операцией возведения в степень
@@ -360,7 +402,8 @@ namespace Calc.ViewModel
 
             switch (key)
             {
-                case Key.D1: AppendToExpression("1"); break;
+
+                case Key.D1: AppendToExpression(isShiftPressed ? "!" : "1"); break;
                 case Key.D2: AppendToExpression("2"); break;
                 case Key.D3: AppendToExpression("3"); break;
                 case Key.D4: AppendToExpression("4"); break;
@@ -387,15 +430,19 @@ namespace Calc.ViewModel
         private void ApplyPercentage() => AppendToExpression("%");
 
         /// <summary>
-        /// Применяет операцию обратного значения (1/x).
+        /// Вычисляет факториал числа.
         /// </summary>
-        private void ApplyReciprocal()
+        private void ApplyFactorial()
         {
-            if (!string.IsNullOrEmpty(Expression))
-            {
-                Expression = $"1/({Expression})";
-                CalculateIntermediateResult();
-            }
+            if (string.IsNullOrWhiteSpace(Expression))
+                return;
+
+            var match = Regex.Match(Expression, @"(\d+)$");
+            if (!match.Success)
+                return;
+
+            Expression = Expression.Insert(match.Index + match.Length, "!");
+            CalculateIntermediateResult();
         }
 
         /// <summary>
