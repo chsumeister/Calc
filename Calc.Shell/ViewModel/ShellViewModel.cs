@@ -10,6 +10,8 @@ using System.Text.RegularExpressions;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Globalization;
+using System.Windows;
+using System.Diagnostics;
 
 namespace Calc.ViewModel
 {
@@ -21,12 +23,64 @@ namespace Calc.ViewModel
         private string _result = string.Empty;
         private bool _isHistoryVisible;
 
+        public event Action ScrollExpressionToEndRequested;
+
         private Brush _expressionColor;
         public Brush ExpressionColor
         {
             get => _expressionColor;
             set => SetProperty(ref _expressionColor, value);
         }
+
+        private double _expressionOffsetX;
+        public double ExpressionOffsetX
+        {
+            get => _expressionOffsetX;
+            set => SetProperty(ref _expressionOffsetX, value);
+        }
+
+        private bool _canScrollLeft;
+        public bool CanScrollLeft
+        {
+            get => _canScrollLeft;
+            set => SetProperty(ref _canScrollLeft, value);
+        }
+
+        private bool _canScrollRight;
+        public bool CanScrollRight
+        {
+            get => _canScrollRight;
+            set => SetProperty(ref _canScrollRight, value);
+        }
+
+        public string Expression
+        {
+            get => _expression;
+            set
+            {
+                SetProperty(ref _expression, value);
+            }
+        }
+
+        public string Result
+        {
+            get => _result;
+            set
+            {
+                if (value.Length > 24)
+                    value = value.Substring(0, 24);
+
+                SetProperty(ref _result, value);
+            }
+        }
+
+        public bool IsHistoryVisible
+        {
+            get => _isHistoryVisible;
+            set => SetProperty(ref _isHistoryVisible, value);
+        }
+
+        public HistoryViewModel HistoryViewModel => _historyViewModel;
 
         public ShellViewModel(HistoryViewModel historyViewModel, ShellModel calculator)
         {
@@ -71,32 +125,8 @@ namespace Calc.ViewModel
         public ICommand DegreeCommand { get; }
         public ICommand SquareCommand { get; }
         public ICommand ToggleSignCommand { get; }
+        public ICommand ScrollExpressionCommand { get; }
 
-        public string Expression
-        {
-            get => _expression;
-            set => SetProperty(ref _expression, value);
-        }
-
-        public string Result
-        {
-            get => _result;
-            set
-            {
-                if (value.Length > 18)
-                    value = value.Substring(0, 18);
-
-                SetProperty(ref _result, value);
-            }
-        }
-
-        public bool IsHistoryVisible
-        {
-            get => _isHistoryVisible;
-            set => SetProperty(ref _isHistoryVisible, value);
-        }
-
-        public HistoryViewModel HistoryViewModel => _historyViewModel;
 
         /// <summary>
         /// Обрабатывает выбор элемента из истории (переносит его в выражение).
@@ -117,22 +147,18 @@ namespace Calc.ViewModel
             if (string.IsNullOrEmpty(value))
                 return;
 
+
             if (char.IsDigit(value[0]) && Expression.EndsWith(")"))
                 return;
 
-            if (Expression.EndsWith("^") && !(value == "-" || char.IsDigit(value[0])))
-                return;
-
             string[] binaryOperators = { "+", "*", "/", "%" };
-
             if (string.IsNullOrEmpty(Expression) && binaryOperators.Contains(value))
                 return;
 
-            string[] operators = { "+", "-", "*", "/" };
-
+            string[] operatorsForCheck = { "+", "-", "*", "/" };
             if (Expression.Length > 0 &&
-                operators.Contains(Expression.Last().ToString()) &&
-                operators.Contains(value))
+                operatorsForCheck.Contains(Expression.Last().ToString()) &&
+                operatorsForCheck.Contains(value))
                 return;
 
             if (Expression.Length == 0 && value == "-")
@@ -141,24 +167,81 @@ namespace Calc.ViewModel
                 return;
             }
 
-            if (value == "%" && Expression.EndsWith("%"))
+            if (Expression.EndsWith("%") && (char.IsDigit(value[0]) || value == "."))
                 return;
 
+            if (value == ".")
+            {
+                if (Expression.Length == 0 || "+-*/(".Contains(Expression.Last()))
+                {
+                    Expression += "0.";
+                    CalculateIntermediateResult();
+                    ScrollExpressionToEndRequested?.Invoke();
+                    return;
+                }
+
+                var match = Regex.Match(Expression, @"(\d+\.\d*|\d*\.\d+|\d+)$");
+                if (match.Success && match.Value.Contains("."))
+                    return;
+
+                Expression += ".";
+                CalculateIntermediateResult();
+                ScrollExpressionToEndRequested?.Invoke();
+                return;
+            }
+
+            if ("+-*/%".Contains(value) && Expression.EndsWith("."))
+                return;
 
             if (value == "^")
             {
                 if (string.IsNullOrEmpty(Expression))
                     return;
 
-                if (operators.Contains(Expression.Last().ToString()))
+                if (operatorsForCheck.Contains(Expression.Last().ToString()))
                     return;
 
                 if (Expression.Contains("^") && !Expression.Split('^').Last().Contains(")"))
                     return;
             }
 
+            if (value == "%" && Expression.EndsWith("%"))
+                return;
+
+            if (char.IsDigit(value[0]) && value != ".")
+            {
+                string[] operators = { "+", "-", "*", "/", "%" };
+                int lastOperatorIndex = -1;
+                for (int i = Expression.Length - 1; i >= 0; i--)
+                {
+                    if (operators.Contains(Expression[i].ToString()))
+                    {
+                        lastOperatorIndex = i;
+                        break;
+                    }
+                }
+
+                string beforeLastNumber = lastOperatorIndex == -1 ? "" : Expression.Substring(0, lastOperatorIndex + 1);
+                string lastNumber = lastOperatorIndex == -1 ? Expression : Expression.Substring(lastOperatorIndex + 1);
+
+                if (lastNumber.Length > 0 && Regex.IsMatch(lastNumber, @"^0+$") && value == "0")
+                {
+                    Expression = beforeLastNumber + "0";
+                    ScrollExpressionToEndRequested?.Invoke();
+                    return;
+                }
+
+                if (lastNumber.Length > 1 && lastNumber.StartsWith("0") && !lastNumber.StartsWith("0."))
+                {
+                    Expression = beforeLastNumber + value;
+                    CalculateIntermediateResult();
+                    ScrollExpressionToEndRequested?.Invoke();
+                    return;
+                }
+            }
             Expression += value;
             CalculateIntermediateResult();
+            ScrollExpressionToEndRequested?.Invoke();
         }
 
         /// <summary>
@@ -186,6 +269,7 @@ namespace Calc.ViewModel
 
             return expr;
         }
+
         /// <summary>
         /// Преобразует выражение с операцией возведения в степень
         /// в эквивалентный формат с использованием функции pow(base, exponent).
@@ -203,6 +287,7 @@ namespace Calc.ViewModel
 
             return result;
         }
+
         /// <summary>
         /// Вычисляет итоговый результат выражения и сохраняет в историю.
         /// </summary>
@@ -219,9 +304,8 @@ namespace Calc.ViewModel
                     return;
                 }
 
-                result = Math.Round(result, 6);
-
-                Result = result.ToString("G", CultureInfo.InvariantCulture);
+                Result = Math.Abs(result) >= 1e15 || Math.Abs(result) <= 1e-15
+            ? result.ToString("G6", CultureInfo.InvariantCulture) : Math.Round(result, 6).ToString("0.######", CultureInfo.InvariantCulture);
                 _historyViewModel.AddEntry($"{Expression} = {Result}");
             }
             catch
@@ -254,7 +338,8 @@ namespace Calc.ViewModel
 
                 result = Math.Round(result, 6);
 
-                Result = result.ToString("G", CultureInfo.InvariantCulture);
+                Result = Math.Abs(result) >= 1e15 || Math.Abs(result) <= 1e-15
+            ? result.ToString("G6", CultureInfo.InvariantCulture) : Math.Round(result, 6).ToString("0.######", CultureInfo.InvariantCulture);
             }
             catch
             {
@@ -275,7 +360,6 @@ namespace Calc.ViewModel
 
             switch (key)
             {
-
                 case Key.D1: AppendToExpression("1"); break;
                 case Key.D2: AppendToExpression("2"); break;
                 case Key.D3: AppendToExpression("3"); break;
