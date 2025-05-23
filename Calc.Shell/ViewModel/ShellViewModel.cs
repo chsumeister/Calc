@@ -508,7 +508,7 @@ namespace Calc.ViewModel
                 {
                     if (double.TryParse(Result, out double number))
                     {
-                        Result = (-number).ToString();
+                        Result = (-number).ToString(CultureInfo.InvariantCulture);
                         Expression = Result;
                     }
                 }
@@ -521,7 +521,7 @@ namespace Calc.ViewModel
                 var currentValue = _calculator.EvaluateExpression(prepared);
 
                 var invertedValue = -currentValue;
-                Expression = invertedValue.ToString();
+                Expression = invertedValue.ToString(CultureInfo.InvariantCulture);
                 Result = Expression;
             }
             catch
